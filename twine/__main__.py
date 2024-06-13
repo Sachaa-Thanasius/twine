@@ -39,13 +39,16 @@ def main() -> Any:
         status_code = response.status_code
         status_phrase = http.HTTPStatus(status_code).phrase
         logger.error(
-            f"{exc.__class__.__name__}: {status_code} {status_phrase} "
-            f"from {response.url}\n"
-            f"{response.reason}"
+            "%s: %s %s from %s\n%s",
+            exc.__class__.__name__,
+            status_code,
+            status_phrase,
+            response.url,
+            response.reason
         )
     except exceptions.TwineException as exc:
         error = True
-        logger.error(f"{exc.__class__.__name__}: {exc.args[0]}")
+        logger.error("%s: %s", exc.__class__.__name__, exc.args[0])
 
     return error
 

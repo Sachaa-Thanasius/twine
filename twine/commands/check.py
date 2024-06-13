@@ -78,7 +78,7 @@ def _check_file(
     filename: str, render_warning_stream: _WarningStream
 ) -> Tuple[List[str], bool]:
     """Check given distribution."""
-    warnings = []
+    warnings: List[str] = []
     is_ok = True
 
     package = package_file.PackageFile.from_filename(filename, comment=None)
@@ -146,7 +146,8 @@ def check(
             logger.error(
                 "`long_description` has syntax errors in markup"
                 " and would not be rendered on PyPI."
-                f"\n{render_warning_stream}"
+                "\n%s",
+                render_warning_stream,
             )
         elif warnings:
             if strict:

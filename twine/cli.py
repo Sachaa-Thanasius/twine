@@ -83,7 +83,7 @@ def list_dependencies_and_versions() -> List[Tuple[str, str]]:
 
 def dep_versions() -> str:
     return ", ".join(
-        "{}: {}".format(*dependency) for dependency in list_dependencies_and_versions()
+        f"{dep_name}: {dep_ver}" for dep_name, dep_ver in list_dependencies_and_versions()
     )
 
 

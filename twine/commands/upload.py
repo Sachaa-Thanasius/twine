@@ -103,9 +103,9 @@ def _make_package(
         package.add_attestations(attestations)
 
     file_size = utils.get_file_size(package.filename)
-    logger.info(f"{package.filename} ({file_size})")
+    logger.info("%s (%s)", package.filename, file_size)
     if package.gpg_signature:
-        logger.info(f"Signed with {package.signed_filename}")
+        logger.info("Signed with %s", package.signed_filename)
 
     return package
 
@@ -219,7 +219,7 @@ def upload(upload_settings: settings.Settings, dists: List[str]) -> None:
             )
 
     repository = upload_settings.create_repository()
-    uploaded_packages = []
+    uploaded_packages: List[package_file.PackageFile] = []
 
     if signatures and not packages_to_upload:
         raise exceptions.InvalidDistribution(
@@ -240,7 +240,7 @@ def upload(upload_settings: settings.Settings, dists: List[str]) -> None:
             continue
 
         resp = repository.upload(package)
-        logger.info(f"Response from {resp.url}:\n{resp.status_code} {resp.reason}")
+        logger.info("Response from %s:\n%s %s", resp.url, resp.status_code, resp.reason)
         if resp.text:
             logger.info(resp.text)
 

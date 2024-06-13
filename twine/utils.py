@@ -25,6 +25,8 @@ from urllib.parse import urlunparse
 
 import requests
 import rfc3986
+import rfc3986.exceptions
+import rfc3986.validators
 
 from twine import exceptions
 
@@ -60,7 +62,7 @@ def get_config(path: str) -> Dict[str, RepositoryConfig]:
     try:
         with open(realpath) as f:
             parser.read_file(f)
-            logger.info(f"Using configuration from {realpath}")
+            logger.info("Using configuration from %s", realpath)
     except FileNotFoundError:
         # User probably set --config-file, but the file can't be read
         if path != DEFAULT_CONFIG_FILE:
@@ -131,8 +133,8 @@ def _validate_repository_url(repository_url: str) -> None:
         validator.validate(rfc3986.uri_reference(repository_url))
     except rfc3986.exceptions.RFC3986Exception as exc:
         raise exceptions.UnreachableRepositoryURLDetected(
-            f"Invalid repository URL: {exc.args[0]}."
-        )
+            "Invalid repository URL: %s.", exc.args[0]
+        ) from exc
 
 
 def get_repository_from_config(
@@ -153,8 +155,8 @@ def get_repository_from_config(
     except KeyError:
         raise exceptions.InvalidConfiguration(
             f"Missing '{repository}' section from {config_file}.\n"
-            f"More info: https://packaging.python.org/specifications/pypirc/ "
-        )
+            "More info: https://packaging.python.org/specifications/pypirc/ "
+        ) from None
 
     config["repository"] = normalize_repository_url(cast(str, config["repository"]))
     return config
@@ -227,14 +229,14 @@ def check_status_code(response: requests.Response, verbose: bool) -> None:
 
     try:
         response.raise_for_status()
-    except requests.HTTPError as err:
+    except requests.HTTPError:
         if not verbose:
             logger.warning(
                 "Error during upload. "
                 "Retry with the --verbose option for more details."
             )
 
-        raise err
+        raise
 
 
 def get_userpass_value(
@@ -266,11 +268,11 @@ def get_userpass_value(
         The credential value, i.e. the username or password.
     """
     if cli_value is not None:
-        logger.info(f"{key} set by command options")
+        logger.info("%s set by command options", key)
         return cli_value
 
     elif config.get(key) is not None:
-        logger.info(f"{key} set from config file")
+        logger.info("%s set from config file", key)
         return config[key]
 
     elif prompt_strategy:
@@ -285,7 +287,7 @@ def get_userpass_value(
             warning = f"Your {key} contains control characters"
 
         if warning:
-            logger.warning(f"{warning}. Did you enter it correctly?")
+            logger.warning("%s. Did you enter it correctly?", warning)
             logger.warning(
                 "See https://twine.readthedocs.io/#entering-credentials "
                 "for more information."

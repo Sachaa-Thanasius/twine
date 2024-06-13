@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import logging
-from typing import Any, Dict, List, Optional, Set, Tuple, cast
+from typing import Any, Dict, List, Optional, Set, Tuple
 
 import requests
 import requests_toolbelt
@@ -54,8 +54,8 @@ class Repository:
         self.session.auth = (
             (username or "", password or "") if username or password else None
         )
-        logger.info(f"username: {username if username else '<empty>'}")
-        logger.info(f"password: <{'hidden' if password else 'empty'}>")
+        logger.info("username: %s", (username if username else "<empty>"))
+        logger.info("password: <%s>", "hidden" if password else "empty")
 
         self.session.headers["User-Agent"] = self._make_user_agent_string()
         for scheme in ("http://", "https://"):
@@ -78,20 +78,18 @@ class Repository:
 
     @staticmethod
     def _make_user_agent_string() -> str:
-        user_agent_string = (
+        return (
             user_agent.UserAgentBuilder("twine", twine.__version__)
             .include_implementation()
             .build()
         )
-
-        return cast(str, user_agent_string)
 
     def close(self) -> None:
         self.session.close()
 
     @staticmethod
     def _convert_data_to_list_of_tuples(data: Dict[str, Any]) -> List[Tuple[str, Any]]:
-        data_to_send = []
+        data_to_send: List[Tuple[str, Any]] = []
         for key, value in data.items():
             if key in KEYWORDS_TO_NOT_FLATTEN or not isinstance(value, (list, tuple)):
                 data_to_send.append((key, value))
@@ -161,13 +159,12 @@ class Repository:
             ) as progress:
                 task_id = progress.add_task("", total=encoder.len)
 
-                monitor = requests_toolbelt.MultipartEncoderMonitor(
-                    encoder,
-                    lambda monitor: progress.update(
-                        task_id,
-                        completed=monitor.bytes_read,
-                    ),
-                )
+                def callback(
+                    monitor: requests_toolbelt.MultipartEncoderMonitor,
+                ) -> None:
+                    return progress.update(task_id, completed=monitor.bytes_read)
+
+                monitor = requests_toolbelt.MultipartEncoderMonitor(encoder, callback)
 
                 resp = self.session.post(
                     self.url,
@@ -190,9 +187,13 @@ class Repository:
             if 500 <= resp.status_code < 600:
                 number_of_redirects += 1
                 logger.warning(
-                    f'Received "{resp.status_code}: {resp.reason}"'
+                    'Received "%s: %s"'
                     "\nPackage upload appears to have failed."
-                    f" Retry {number_of_redirects} of {max_redirects}."
+                    " Retry %s of %s.",
+                    resp.status_code,
+                    resp.reason,
+                    number_of_redirects,
+                    max_redirects,
                 )
             else:
                 return resp

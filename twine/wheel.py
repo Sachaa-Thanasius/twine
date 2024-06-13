@@ -59,7 +59,7 @@ class Wheel(distribution.Distribution):
     def read(self) -> bytes:
         fqn = os.path.abspath(os.path.normpath(self.filename))
         if not os.path.exists(fqn):
-            raise exceptions.InvalidDistribution("No such file: %s" % fqn)
+            raise exceptions.InvalidDistribution(f"No such file: {fqn}")
 
         if fqn.endswith(".whl"):
             archive = zipfile.ZipFile(fqn)
@@ -70,7 +70,7 @@ class Wheel(distribution.Distribution):
 
         else:
             raise exceptions.InvalidDistribution(
-                "Not a known archive format for file: %s" % fqn
+                f"Not a known archive format for file: {fqn}"
             )
 
         searched_files: List[str] = []
@@ -86,7 +86,7 @@ class Wheel(distribution.Distribution):
 
         raise exceptions.InvalidDistribution(
             "No METADATA in archive or METADATA missing 'Metadata-Version': "
-            "%s (searched %s)" % (fqn, ",".join(searched_files))
+            f"{fqn} (searched {','.join(searched_files)})"
         )
 
     def parse(self, data: bytes) -> None:

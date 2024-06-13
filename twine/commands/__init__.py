@@ -37,7 +37,7 @@ def _group_wheel_files_first(files: List[str]) -> List[str]:
 
 
 def _find_dists(dists: List[str]) -> List[str]:
-    uploads = []
+    uploads: List[str] = []
     for filename in dists:
         if os.path.exists(filename):
             uploads.append(filename)
@@ -47,7 +47,7 @@ def _find_dists(dists: List[str]) -> List[str]:
         # If nothing matches, files is []
         if not files:
             raise exceptions.InvalidDistribution(
-                "Cannot find file (or expand pattern): '%s'" % filename
+                f"Cannot find file (or expand pattern): '{filename}'"
             )
         # Otherwise, files will be filenames that exist
         uploads.extend(files)

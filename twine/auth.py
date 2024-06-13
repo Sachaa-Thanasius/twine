@@ -28,8 +28,7 @@ class Resolver:
     def choose(cls, interactive: bool) -> Type["Resolver"]:
         return cls if interactive else Private
 
-    @property
-    @functools.lru_cache()
+    @functools.cached_property
     def username(self) -> Optional[str]:
         if cast(str, self.config["repository"]).startswith(
             (utils.DEFAULT_REPOSITORY, utils.TEST_REPOSITORY)
@@ -45,8 +44,7 @@ class Resolver:
             prompt_strategy=self.username_from_keyring_or_prompt,
         )
 
-    @property
-    @functools.lru_cache()
+    @functools.cached_property
     def password(self) -> Optional[str]:
         return utils.get_userpass_value(
             self.input.password,

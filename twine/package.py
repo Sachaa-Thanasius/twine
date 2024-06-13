@@ -98,13 +98,13 @@ class PackageFile:
                     meta = DIST_TYPES[dtype](filename)
                 except EOFError:
                     raise exceptions.InvalidDistribution(
-                        "Invalid distribution file: '%s'" % os.path.basename(filename)
-                    )
+                        f"Invalid distribution file: '{os.path.basename(filename)}'"
+                    ) from None
                 else:
                     break
         else:
             raise exceptions.InvalidDistribution(
-                "Unknown distribution format: '%s'" % os.path.basename(filename)
+                f"Unknown distribution format: '{os.path.basename(filename)}'"
             )
 
         # If pkginfo encounters a metadata version it doesn't support, it may give us
@@ -203,15 +203,15 @@ class PackageFile:
         return data
 
     def add_attestations(self, attestations: List[str]) -> None:
-        loaded_attestations = []
+        loaded_attestations: List[Dict[str, Any]] = []
         for attestation in attestations:
             with open(attestation, "rb") as att:
                 try:
                     loaded_attestations.append(json.load(att))
-                except json.JSONDecodeError:
+                except json.JSONDecodeError as exc:
                     raise exceptions.InvalidDistribution(
                         f"invalid JSON in attestation: {attestation}"
-                    )
+                    ) from exc
 
         self.attestations = loaded_attestations
 
@@ -238,22 +238,23 @@ class PackageFile:
     def run_gpg(cls, gpg_args: Tuple[str, ...]) -> None:
         try:
             subprocess.check_call(gpg_args)
-            return
-        except FileNotFoundError:
+        except FileNotFoundError as exc:
             if gpg_args[0] != "gpg":
                 raise exceptions.InvalidSigningExecutable(
                     f"{gpg_args[0]} executable not available."
-                )
+                ) from exc
+        else:
+            return
 
         logger.warning("gpg executable not available. Attempting fallback to gpg2.")
         try:
             subprocess.check_call(("gpg2",) + gpg_args[1:])
-        except FileNotFoundError:
+        except FileNotFoundError as exc:
             raise exceptions.InvalidSigningExecutable(
                 "'gpg' or 'gpg2' executables not available.\n"
                 "Try installing one of these or specifying an executable "
                 "with the --sign-with flag."
-            )
+            ) from exc
 
 
 class Hexdigest(NamedTuple):

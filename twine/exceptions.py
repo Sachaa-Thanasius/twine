@@ -18,8 +18,6 @@
 class TwineException(Exception):
     """Base class for all exceptions raised by twine."""
 
-    pass
-
 
 class RedirectDetected(TwineException):
     """A redirect was detected that the user needs to resolve.
@@ -52,8 +50,6 @@ class PackageNotFound(TwineException):
     This is only used when attempting to register a package_file.
     """
 
-    pass
-
 
 class UploadToDeprecatedPyPIDetected(TwineException):
     """An upload attempt was detected to deprecated PyPI domains.
@@ -67,13 +63,13 @@ class UploadToDeprecatedPyPIDetected(TwineException):
     ) -> "UploadToDeprecatedPyPIDetected":
         """Return an UploadToDeprecatedPyPIDetected instance."""
         return cls(
-            "You're trying to upload to the legacy PyPI site '{}'. "
+            f"You're trying to upload to the legacy PyPI site '{target_url}'. "
             "Uploading to those sites is deprecated. \n "
             "The new sites are pypi.org and test.pypi.org. Try using "
-            "{} (or {}) to upload your packages instead. "
+            f"{default_url} (or {test_url}) to upload your packages instead. "
             "These are the default URLs for Twine now. \n More at "
             "https://packaging.python.org/guides/migrating-to-pypi-org/"
-            " .".format(target_url, default_url, test_url)
+            " ."
         )
 
 
@@ -83,37 +79,25 @@ class UnreachableRepositoryURLDetected(TwineException):
     All repository URLs must have a protocol (e.g., ``https://``).
     """
 
-    pass
-
 
 class InvalidSigningConfiguration(TwineException):
     """Both the sign and identity parameters must be present."""
-
-    pass
 
 
 class InvalidSigningExecutable(TwineException):
     """Signing executable must be installed on system."""
 
-    pass
-
 
 class InvalidConfiguration(TwineException):
     """Raised when configuration is invalid."""
-
-    pass
 
 
 class InvalidDistribution(TwineException):
     """Raised when a distribution is invalid."""
 
-    pass
-
 
 class NonInteractive(TwineException):
     """Raised in non-interactive mode when credentials could not be found."""
-
-    pass
 
 
 class InvalidPyPIUploadURL(TwineException):
@@ -121,5 +105,3 @@ class InvalidPyPIUploadURL(TwineException):
 
     For example, https://pypi.org instead of https://upload.pypi.org/legacy.
     """
-
-    pass
